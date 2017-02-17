@@ -12,5 +12,5 @@
         "php": "^7.0",
         "zendframework/zend-http": "^2.6",
         "doctrine/dbal": "^2.5"
-    },
+    }
 }
