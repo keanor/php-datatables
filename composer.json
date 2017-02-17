@@ -1,0 +1,16 @@
+{
+    "name": "keanor/php-datatables",
+    "description": "Server-Side backend for DataTables",
+    "license": "MIT",
+    "homepage": "https://github.com/keanor/php-datatables",
+    "autoload": {
+        "psr-4": {
+            "PHPDataTables\\": "src/"
+        }
+    },
+    "require": {
+        "php": "^7.0",
+        "zendframework/zend-http": "^2.6",
+        "doctrine/dbal": "^2.5"
+    },
+}
