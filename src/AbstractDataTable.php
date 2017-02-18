@@ -1,5 +1,5 @@
 <?php
-namespace PHPDataTables\DataTables;
+namespace PHPDataTables;
 
 use Zend\Http\PhpEnvironment\Request;
 
@@ -50,7 +50,14 @@ abstract class AbstractDataTable
         }
 
         $this->configuration = $configuration;
+
+        $this->init();
     }
+
+    /**
+     * @return void
+     */
+    abstract public function init();
 
     /**
      * Add column
@@ -60,7 +67,7 @@ abstract class AbstractDataTable
      *
      * @return void
      */
-    public function addColumn(array $spec): void
+    public function addColumn(array $spec)
     {
         if (!isset($spec['name'])) {
             throw new \Exception('Missing required option "name"!');
@@ -117,13 +124,19 @@ abstract class AbstractDataTable
             }, $this->getColumns())
         );
 
+        // prepare output
+//        $data = array_map(function (array $row) {
+//            $row['DTRowId'] = $row['id'];
+//            return $row;
+//        }, $items);
+
         // create DataTables structure
-        $result = array(
-            'sEcho' => (int)$request->getQuery('sEcho'),
-            'iTotalRecords' => $count,
-            'iTotalDisplayRecords' => count($items),
-            'aaData' => $items
-        );
+        $result = [
+            'draw' => 1,
+            'recordsTotal' => $count,
+            'recordsFiltered' => count($items),
+            'data' => $items
+        ];
 
         return $result;
     }
@@ -138,6 +151,10 @@ abstract class AbstractDataTable
         $limit = (int)$request->getQuery('iDisplayStart');
         if ($limit > $this->configuration['max_page_size']) {
             $limit = $this->configuration['max_page_size'];
+        }
+
+        if ($limit === 0) {
+            $limit = $this->configuration['default_page_size'];
         }
 
         if ($limit == -1) {

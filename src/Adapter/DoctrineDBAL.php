@@ -1,5 +1,5 @@
 <?php
-namespace PHPDataTables\DataTables\Adapter;
+namespace PHPDataTables\Adapter;
 
 use Doctrine\DBAL\Connection;
 
@@ -32,7 +32,7 @@ class DoctrineDBAL implements AdapterInterface
      *
      * @return void
      */
-    public function setLimits(int $offset, int $limit): void
+    public function setLimits(int $offset, int $limit)
     {
         $this->queryBuilder->setFirstResult($offset);
         $this->queryBuilder->setMaxResults($limit);
@@ -45,7 +45,7 @@ class DoctrineDBAL implements AdapterInterface
      *
      * @return void
      */
-    public function setOrders(array $orders): void
+    public function setOrders(array $orders)
     {
         foreach ($orders as $column => $direction) {
             $this->queryBuilder->addOrderBy($column, $direction);
@@ -59,15 +59,17 @@ class DoctrineDBAL implements AdapterInterface
      *
      * @return void
      */
-    public function setSearch(array $search): void
+    public function setSearch(array $search)
     {
         $expr = $this->queryBuilder->expr();
         $conditions = $this->prepareConditions($search);
 
-        $this->queryBuilder->where(call_user_func_array(
-            [ $expr, 'orX' ],
-            $conditions
-        ));
+        if (count($conditions) > 0) {
+            $this->queryBuilder->where(call_user_func_array(
+                [$expr, 'orX'],
+                $conditions
+            ));
+        }
     }
 
     /**
@@ -77,15 +79,17 @@ class DoctrineDBAL implements AdapterInterface
      *
      * @return void
      */
-    public function setFilters(array $filters): void
+    public function setFilters(array $filters)
     {
         $expr = $this->queryBuilder->expr();
         $conditions = $this->prepareConditions($filters);
 
-        $this->queryBuilder->andWhere(call_user_func_array(
-            [ $expr, 'andX' ],
-            $conditions
-        ));
+        if (count($conditions) > 0) {
+            $this->queryBuilder->andWhere(call_user_func_array(
+                [$expr, 'andX'],
+                $conditions
+            ));
+        }
     }
 
     /**

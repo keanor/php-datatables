@@ -5,7 +5,7 @@
  * Date: 16.02.17
  * Time: 17:47
  */
-namespace PHPDataTables\DataTables;
+namespace PHPDataTables;
 
 /**
  * Class Column
@@ -16,6 +16,7 @@ class Column
     const OPTION_SEARCH_TYPE = 'search_type';
     const OPTION_ALLOW_SEARCH = 'allow_search_fulltext';
     const OPTION_ALLOW_ORDER = 'allow_order';
+    const OPTION_LABEL = 'label';
 
     const SEARCH_TYPE_FULLTEXT = 'fulltext';
     const SEARCH_TYPE_EXACTLY = 'exactly';
@@ -99,7 +100,7 @@ class Column
      */
     public function getOption($key, $default = null)
     {
-        if (!isset($this->options[$key])) {
+        if (isset($this->options[$key])) {
             return $this->options[$key];
         }
 
@@ -112,5 +113,13 @@ class Column
     public function getOptions(): array
     {
         return $this->options;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLabel(): string
+    {
+        return $this->getOption('label', $this->jsName);
     }
 }

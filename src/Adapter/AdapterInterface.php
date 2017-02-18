@@ -1,5 +1,5 @@
 <?php
-namespace PHPDataTables\DataTables\Adapter;
+namespace PHPDataTables\Adapter;
 
 /**
  * Interface AdapterInterface
@@ -15,7 +15,7 @@ interface AdapterInterface
      *
      * @return void
      */
-    public function setLimits(int $offset, int $limit): void;
+    public function setLimits(int $offset, int $limit);
 
     /**
      * Set query orders
@@ -24,7 +24,7 @@ interface AdapterInterface
      *
      * @return void
      */
-    public function setOrders(array $orders): void;
+    public function setOrders(array $orders);
 
     /**
      * Set search, search any!!! condition
@@ -33,7 +33,7 @@ interface AdapterInterface
      *
      * @return void
      */
-    public function setSearch(array $search): void;
+    public function setSearch(array $search);
 
     /**
      * Set column value filters
@@ -42,7 +42,7 @@ interface AdapterInterface
      *
      * @return void
      */
-    public function setFilters(array $filters): void;
+    public function setFilters(array $filters);
 
     /**
      * Return total count
