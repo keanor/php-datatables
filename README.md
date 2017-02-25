@@ -1,5 +1,10 @@
 # PHP DataTables Server-Side
 
+Install:
+```bash
+$ composer require keanor/php-datatables
+```
+
 Example, for users table:
 
 1) Create datatable class:
