@@ -30,6 +30,8 @@ abstract class AbstractDataTable
      */
     private $columns = [];
 
+    private $actions = [];
+    
     /**
      * AbstractDataTable constructor.
      *
@@ -79,6 +81,43 @@ abstract class AbstractDataTable
         $this->columns[] = new Column($jsName, $dbName, $options);
     }
 
+    public function addAction(array $spec)
+    {
+        if (! isset($spec['url']) || ! isset($spec['label'])) {
+            throw new \Exception('Missing required options');
+        }
+
+        $this->actions[] = $spec;
+    }
+    
+    protected function injectActions(array &$items)
+    {
+        foreach ($this->actions as &$action) {
+            foreach ($items as &$item) {
+                $find = [];
+                preg_match_all("/&[a-z1-9]*&/", $action['url'], $find);
+
+                foreach ($find[0] as $actionParamName) {
+                    $clearParamName = trim($actionParamName, "&");
+                    $paramExist = false;
+                    foreach ($this->columns as $column) {
+                        if ($clearParamName == $column->getJsName()) {
+                            $paramValue = $item[$clearParamName];
+                            $action['url'] = str_replace($actionParamName, $paramValue, $action['url']);
+                            $paramExist = true;
+                        }
+                    }
+
+                    if (! $paramExist) {
+                        throw new \Exception("Url param doesnt exists");
+                    }
+                }
+
+                $item['actions'][] = $action;
+            }
+        }
+    }
+    
     /**
      * Get column
      *
@@ -124,6 +163,8 @@ abstract class AbstractDataTable
             }, $this->getColumns())
         );
 
+        $this->injectActions($items);
+        
         // prepare output
 //        $data = array_map(function (array $row) {
 //            $row['DTRowId'] = $row['id'];
