@@ -1,6 +1,8 @@
 <?php
 namespace PHPDataTables;
 
+use PHPDataTables\Action\AbstractActionType;
+use PHPDataTables\Action\Link;
 use Zend\Http\PhpEnvironment\Request;
 
 /**
@@ -30,8 +32,11 @@ abstract class AbstractDataTable
      */
     private $columns = [];
 
+    /**
+     * @var AbstractActionType[]
+     */
     private $actions = [];
-    
+
     /**
      * AbstractDataTable constructor.
      *
@@ -83,41 +88,26 @@ abstract class AbstractDataTable
 
     public function addAction(array $spec)
     {
-        if (! isset($spec['url']) || ! isset($spec['label'])) {
-            throw new \Exception('Missing required options');
+        if (! class_exists($spec['type'])) {
+            throw new \Exception('Wrong type');
         }
 
-        $this->actions[] = $spec;
+        $action = new $spec['type'];
+
+        if (! $action instanceof AbstractActionType) {
+            throw new \Exception('Type must extend AbstractActionType');
+        }
+
+        $action->setOptions($spec['options']);
+        $this->actions[] = $action;
     }
-    
+
     protected function injectActions(array &$items)
     {
-        foreach ($this->actions as &$action) {
-            foreach ($items as &$item) {
-                $find = [];
-                preg_match_all("/&[a-z1-9]*&/", $action['url'], $find);
-
-                foreach ($find[0] as $actionParamName) {
-                    $clearParamName = trim($actionParamName, "&");
-                    $paramExist = false;
-                    foreach ($this->columns as $column) {
-                        if ($clearParamName == $column->getJsName()) {
-                            $paramValue = $item[$clearParamName];
-                            $action['url'] = str_replace($actionParamName, $paramValue, $action['url']);
-                            $paramExist = true;
-                        }
-                    }
-
-                    if (! $paramExist) {
-                        throw new \Exception("Url param doesnt exists");
-                    }
-                }
-
-                $item['actions'][] = $action;
-            }
+        foreach ($this->actions as $action) {
+            $action->injectData($items);
         }
     }
-    
     /**
      * Get column
      *
@@ -292,6 +282,14 @@ abstract class AbstractDataTable
     public function getAdapter(): Adapter\AdapterInterface
     {
         return $this->adapter;
+    }
+
+    /**
+     * @return Action\AbstractActionType[]
+     */
+    public function getActions(): array
+    {
+        return $this->actions;
     }
 
     /**

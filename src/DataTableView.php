@@ -70,6 +70,10 @@ JS;
             return [ 'data' => $column->getJsName() ];
         }, $this->dataTable->getColumns());
 
+        if ($this->dataTable->getActions()) {
+            $columns[] = ["data" => "actions"];
+        }
+
         return sprintf($template, $this->jsId, $this->serverSideUrl, Json::encode($columns));
     }
 
@@ -113,6 +117,10 @@ JS;
         $result = '';
         foreach ($this->dataTable->getColumns() as $column) {
             $result .= sprintf('<%s>%s</%s>', $cellTag, $column->getLabel(), $cellTag);
+        }
+
+        if ($this->dataTable->getActions()) {
+            $result .= sprintf('<%s>%s</%s>', $cellTag, 'Действия', $cellTag);
         }
 
         return $result;
