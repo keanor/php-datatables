@@ -1,6 +1,8 @@
 <?php
 namespace PHPDataTables;
 
+use PHPDataTables\Action\AbstractActionType;
+use PHPDataTables\Action\Link;
 use Zend\Http\PhpEnvironment\Request;
 
 /**
@@ -29,6 +31,11 @@ abstract class AbstractDataTable
      * @var Column[]
      */
     private $columns = [];
+
+    /**
+     * @var AbstractActionType[]
+     */
+    private $actions = [];
 
     /**
      * AbstractDataTable constructor.
@@ -79,6 +86,28 @@ abstract class AbstractDataTable
         $this->columns[] = new Column($jsName, $dbName, $options);
     }
 
+    public function addAction(array $spec)
+    {
+        if (! class_exists($spec['type'])) {
+            throw new \Exception('Wrong type');
+        }
+
+        $action = new $spec['type'];
+
+        if (! $action instanceof AbstractActionType) {
+            throw new \Exception('Type must extend AbstractActionType');
+        }
+
+        $action->setOptions($spec['options']);
+        $this->actions[] = $action;
+    }
+
+    protected function injectActions(array &$items)
+    {
+        foreach ($this->actions as $action) {
+            $action->injectData($items);
+        }
+    }
     /**
      * Get column
      *
@@ -124,6 +153,8 @@ abstract class AbstractDataTable
             }, $this->getColumns())
         );
 
+        $this->injectActions($items);
+        
         // prepare output
 //        $data = array_map(function (array $row) {
 //            $row['DTRowId'] = $row['id'];
@@ -251,6 +282,14 @@ abstract class AbstractDataTable
     public function getAdapter(): Adapter\AdapterInterface
     {
         return $this->adapter;
+    }
+
+    /**
+     * @return Action\AbstractActionType[]
+     */
+    public function getActions(): array
+    {
+        return $this->actions;
     }
 
     /**
